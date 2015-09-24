@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '+)jv-!@#2z85$8%z!jl0bk(1^oxsy@+9j7ad30qmnul%)!nz$x'
+SECRET_KEY = '1grm)+a+e8-piz%6q8v)z1)s^x601e@txgnq#9d!hod1oz_rl('
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -51,7 +51,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
 )
 
-ROOT_URLCONF = 'www.urls'
+ROOT_URLCONF = 'metrica.urls'
 
 TEMPLATES = [
     {
@@ -69,7 +69,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'www.wsgi.application'
+WSGI_APPLICATION = 'metrica.wsgi.application'
 
 
 # Database

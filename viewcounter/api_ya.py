@@ -6,18 +6,12 @@ SUMMARY = 'https://api-metrika.yandex.ru/stat/traffic/summary.json?id=%s&oauth_t
 API = 'https://api-metrika.yandex.ru/'
 
 class Metrica:
+	"""Metrica class provides methods to work with Yandex Metrica API	
 	"""
-		
-	"""
-	
-	def __init__(self, client_id):
-		self.client_id = client_id
-		self.token = ''
-		self.counters_dict={}
-	
+
 	def OAuth(self):
 		""" (Metrica) -> NoneType
-                Authorize method. Sets self.token
+        Authorize method. Sets self.token
 		"""
 		req = requests.get(AUTH+self.client_id)
 		if req.status_code == 200:
@@ -47,16 +41,18 @@ class Metrica:
 		""" (Metrica, dict) -> NoneType
 		Reads id, name, site, status and views from dictionary into self.counters_dict
 		"""
-		dict_len = len(dictionary['counters'])
-		for i in range(dict_len):
-			counter_id = dictionary['counter'][i]['id']
-			name = dictionary['counter'][i]['name']
-			site = dictionary['counter'][i]['site']
-			status = dictionary['counter'][i]['code_status']
-			views = self.GetCounterStats(counter_id)
-			self.counters_dict[id] = {'name':name,'site':site, 'code_status':status, 'views':views }
-				
-				
+		if bool(dictionary):
+			dict_len = len(dictionary['counters'])
+			for i in range(dict_len):
+				counter_id = dictionary['counters'][i]['id']
+				views = self.GetCounterStats(counter_id)
+				self.counters_dict[counter_id] = {
+					'name':dictionary['counters'][i]['name'],
+					'site':dictionary['counters'][i]['site'], 
+					'code_status':dictionary['counters'][i]['code_status'], 
+					'views':views
+				}
+							
 	def GetCounterStats(self, counter_id):
 		""" (Metrica, int) -> NoneType
 		Creates GET HTTP request to Yandex Metrica API
@@ -66,8 +62,11 @@ class Metrica:
 		req = requests.get(SUMMARY % (counter_id,self.token))
 		if req.status_code == 200:
 			response = req.json()
-			views = responce['totals']['visits']
+			views = response['totals']['visits']
 			
 		return views
-	
-	
+		
+	def __init__(self, client_id, token=''):
+		self.client_id = client_id
+		self.token = token
+		self.counters_dict={}	

@@ -1,28 +1,49 @@
-import api_ya
 import json
 from django.views.generic import View
 from django.http import JsonResponse
+from django.http import HttpResponse
 from .models import CountersInfo
+from .api_ya import Metrica
+from .kdm_tools import KdmToolSet 
+from django.utils import timezone
 
 
 class ViewsCounterGet(View):
-	model = CountersInfo
 	
 	def get(self, request):
-		result = CountersInfo.objects.values('counter_id', 'counter_name', 'counter_views' ).order_by('-timestamp')[:1]
-		#need to make sure that result is dict
-		if type(result) is not dict:
-			#converting queryset object into dict
-			
-		return JsonResponse(result)
+		query_set = list(CountersInfo.objects.values_list(
+			'counter_id', 'name', 'views'
+		).order_by('-timestamp')[:1])
 		
-class ViewsCounterMain(View)
-	def get(self, request):		 
-		return HttpResponse('What do u need?')
+		json_data = json.dumps(query_set)
+		return HttpResponse(json_data, content_type='application/json')
+				
+class ViewsCounterMain(View):
 		
-	def post(self, request):
-		#getting info from YA metrica
+	def get(self, request):
+		#getting id and other things from db	
+		q = KdmToolSet()
+		client_id, client_token = q.readfile('settings.txt')
 		
-		#saving to db
-		
-		return result
+		#getting info from YA metrica	
+		m = Metrica(client_id, client_token)
+		if m.token == '':
+			m.OAuth()
+			if m.token =='':
+				return HttpResponse(status=500)
+
+		m.GetCounters()
+		#checking if Metrica.counters_dict is not empty
+		if bool(m.counters_dict):
+			counters = m.counters_dict
+			for key in counters:
+				info = CountersInfo()
+				info.counter_id = key 
+				info.name = counters[key]['name']
+				info.site = counters[key]['site']
+				info.status = counters[key]['code_status']
+				info.views = counters[key]['views']
+				info.period = timezone.now()
+				info.save()
+			return HttpResponse(status=200)
+		return HttpResponse(status=500)
