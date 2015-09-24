@@ -1,4 +1,4 @@
-ID: c9aff383ddfc4f7693637c984bfc064a
-Token: 7f56b1a9d80648c7b87ae588a905a9be
-Pass: 4c05a69da3264baa889dd1d142d29208
-CallbackURL: https://oauth.yandex.ru/verification_code?ncrnd=6644
+id: c9aff383ddfc4f7693637c984bfc064a
+token: 7f56b1a9d80648c7b87ae588a905a9be
+pass: 4c05a69da3264baa889dd1d142d29208
+callbackURL: https://oauth.yandex.ru/verification_code?ncrnd=6644
