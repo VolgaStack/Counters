@@ -30,8 +30,8 @@ class Metrica:
 			response = req.json()
 			self.ReadCountersInfo(response)
 
-			while 'next' in response:
-				req = requests.get(response['next'])
+			while 'next' in response['links']:
+				req = requests.get(response['links']['next'])
 				if req.status_code == 200:
 					response = req.json()
 					self.ReadCountersInfo(response)
