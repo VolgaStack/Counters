@@ -1,19 +1,16 @@
 import json
 from django.views.generic import View
 from django.http import HttpResponse
-from .models import Summary, Counter
+from .models import Counter
 from .yandex_api import Metrica
-from .kdm_tools import KdmToolSet 
-from django.utils import timezone
-from datetime import date
+from .kdm_tools import KdmToolSet
 
 
 class ViewsCounterGet(View):
 	
 	def get(self, request):
-		query_set = list(CountersInfo.objects.values_list(
-			'name', 'visits'
-		).order_by('-timestamp')[:1])
+		query_set = list(Summary.objects.values_list('name', 'visits',
+		).filter(start_date=timezone.now(),end_date=timezone.now()).order_by('-timestamp')[:1])
 		
 		json_data = json.dumps(query_set)
 		return HttpResponse(json_data, content_type='application/json')
@@ -34,10 +31,14 @@ class ViewsCounterMain(View):
 		#checking if Counters_dict is not empty,
 		#if not make a db call to check for counters in it -> add only new counters
 		if bool(counters_dict):
-			t.WriteToDb(counters_dict)
-		else:
-			return HttpResponse(status=500)
+			t.WriteToDbCounters(counters_dict)
 		
-		#now we got counters in db we can get some data from API!
-		counters_list = list(Counter.objects.values_list('counter_id', flat=True)
+		#now we got counters in db or we added none new we can request some data from API!
+		counters_list = list(Counter.objects.values_list('counter_id', flat=True))
+		#setting report parametrs to period = day, metrics = visits
+		args = {'date1':'today', 'date2':'today', 'metrics':'ym:s:visits', }
+		report = m.GetReport(counters_list,args)
+		t.WriteToDbSummary(report, counters_list)
+		
+		return HttpResponse(status=200)
 		
