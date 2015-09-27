@@ -16,7 +16,7 @@ class MetricaMethodTests(TestCase):
         token = '7f56b1a9d80648c7b87ae588a905a9be' 
         m = Metrica(client_id)
         m.OAuth()
-        self.assertEqual(m.token, token)
+        self.assertEqual(m._token, token)
         
     def test_get_counters_url_creation(self):
         """ m.OAuth should set self.token to token if authorize was sucsessfull

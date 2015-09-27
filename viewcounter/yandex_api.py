@@ -1,10 +1,12 @@
 import requests
 
+
 __all__ = ["OAuth", "GetCounters", "GetReport",
 
 ]
 
-AUTH = 'https://oauth.yandex.ru/authorize?response_type=token&client_id=' 
+AUTH = 'https://oauth.yandex.ru/authorize'
+AUTH_TOKEN = 'https://oauth.yandex.ru/token'
 COUNTERS = 'management/v1/counters?oauth_token=%s'
 REPORT = 'stat/v1/data?ids=%s&oauth_token=%s'
 API = 'https://api-metrika.yandex.ru/'
@@ -17,14 +19,20 @@ class Metrica:
         """ (Metrica) -> NoneType
         Authorize method. Sets self._token
         """
-		
-        req = requests.POST(AUTH + self._client_id)
-        if req.status_code == 200:
-            url = req.url   
-            token = url[url.find('#access_token='):url.find('&token_type=')]
-            token = token[token.find('#access_token='):token.find('&expires_in=')]
-            self._token = token[token.find('=')+1:]
-                
+        params = {'client_id':self._client_id}
+        if self._code:
+            params['grant_type'] = 'authorization_code'
+            params['client_secret'] = self._client_pass
+            response = requests.post(AUTH_TOKEN, params=params)
+            result = response.json()
+            self._token = result['access_token']       
+        else:       
+            params['response_type'] = 'code'
+            params['display'] = 'popup'
+            req = requests.Request('GET', url=AUTH, params=params)
+            req = req.prepare()
+            return req.url
+             
     def GetCounters(self):
         """ (Metrica) -> dict of dict
         Gets all availiable counters from Yandex Metrica API
@@ -60,11 +68,12 @@ class Metrica:
         if req.status_code == 200:
             response = req.json()
             #reading next page if there is one
-            while 'next' in response['links']:
-                req = requests.get(response['links']['next'])
-                if req.status_code == 200:
-                    old_response = response
-                    response = dict_add(old_response, req.json())     
+            if 'links' in response: 
+                while 'next' in response['links']:
+                    req = requests.get(response['links']['next'])
+                    if req.status_code == 200:
+                        old_response = response
+                        response = dict_add(old_response, req.json())     
         return response
         
     
@@ -80,13 +89,9 @@ class Metrica:
                 dict1['totals'].append(dict2['totals'][i])
             dict1['total_rows'] += dict2['total_rows']          
         return dict1
-        
-    def __init__(self, client_id, username='', password='', token='', code=''):
+    
+    def __init__(self, client_id, client_pass='', token='', code=''):
         self._client_id = client_id
+        self._client_pass = client_pass
         self._token = token
-        self._username = username
-        self._password = password
         self._code = code
-        
-        if self._token == '':
-            self.OAuth();
