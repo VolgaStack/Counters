@@ -1,5 +1,5 @@
 import requests
-
+import urllib
 
 __all__ = ["OAuth", "GetCounters", "GetReport",
 
@@ -20,17 +20,20 @@ class Metrica:
         Authorize method. Sets self._token
         """
         params = {'client_id':self._client_id}
+        headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
         if self._code:
             params['grant_type'] = 'authorization_code'
             params['client_secret'] = self._client_pass
-            response = requests.post(AUTH_TOKEN, params=params)
-            result = response.json()
+            params['code'] = self._code
+            
+            params = urllib.parse.urlencode(params)
+            req = requests.post(AUTH_TOKEN, data=params, headers=headers)          
+            result = req.json()
             self._token = result['access_token']       
         else:       
             params['response_type'] = 'code'
             params['display'] = 'popup'
-            req = requests.Request('GET', url=AUTH, params=params)
-            req = req.prepare()
+            req = requests.get(AUTH, params=params)
             return req.url
              
     def GetCounters(self):
@@ -45,17 +48,12 @@ class Metrica:
         Gets Report from Yandex Metrica API
         """
         add_counter = ''
-        add_string = ''
         
         for item in counter_list:
             add_counter += str(item) + ','
         add_counter=add_counter[0:-1]   
-            
         
-        for key in args:
-            add_string += '&' + key + '=' + args[key]
-        
-        req = requests.get(API + REPORT % (add_counter,self._token) + add_string)
+        req = requests.get(API + REPORT % (add_counter,self._token), params=args)
         return self.read_json_from_req(req)
         
         

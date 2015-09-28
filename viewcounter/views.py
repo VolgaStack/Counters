@@ -12,7 +12,7 @@ from .kdm_tools import KdmToolSet
 class ViewsCounterGet(View):
     
     def get(self, request):
-        today = datetime.date(timezone.now())
+        today = timezone.now().date
         query_set = list(Summary.objects.values_list('name', 'visits',
         ).filter(start_date=today,end_date=today).order_by('-timestamp')[:1])
         
@@ -29,6 +29,8 @@ class ViewsCounterMain(View):
                     client_pass=settings.client_pass,
                     token = settings.token,         
         )
+        
+        t = KdmToolSet()
             
         if 'code' in request.GET:
             m._code = request.GET['code']
@@ -36,7 +38,7 @@ class ViewsCounterMain(View):
             
             settings.token = m._token
             settings.save()
-			
+            
             counters_dict = m.GetCounters()
             #if Counters_dict is not empty -> select all counters -> compare -> add only new counters
             if bool(counters_dict):
@@ -48,8 +50,9 @@ class ViewsCounterMain(View):
             args = {'date1':'today', 'date2':'today', 'metrics':'ym:s:visits', }
             report = m.GetReport(counters_list,args)
             if bool(report):
+                today = timezone.now().date
                 counters_list = list(Summary.objects.values_list('counter', flat=True).filter(
-                    start_date=timezone.now(),end_date=timezone.now()
+                    start_date=today,end_date=today
                 ))
                 t.WriteToDbSummary(report, counters_list)
             
