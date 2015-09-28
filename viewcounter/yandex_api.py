@@ -27,9 +27,10 @@ class Metrica:
             params['code'] = self._code
             
             params = urllib.parse.urlencode(params)
-            req = requests.post(AUTH_TOKEN, data=params, headers=headers)          
-            result = req.json()
-            self._token = result['access_token']       
+            req = requests.post(AUTH_TOKEN, data=params, headers=headers)
+            if req.status_code == 200:
+                result = req.json()
+                self._token = result['access_token']       
         else:       
             params['response_type'] = 'code'
             params['display'] = 'popup'
