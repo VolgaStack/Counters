@@ -2,26 +2,12 @@ import os
 from .models import Summary, Counter
 from django.utils import timezone
 
-__all__ = ["ReadFile", "WriteToDbCounters", "WriteToDbSummary",
+__all__ = ["WriteToDbCounters", "WriteToDbSummary",
 
 ]
 
 class KdmToolSet:
-    
-    def ReadFile(self, filename):
-        READ = ['id:', 'password:', 'ID:', 'PASSWORD:', 'Пароль:',
-			    'Токен:', 'Token:', 'token:', 'токен:'
-		]
-        module_dir = os.path.dirname(__file__)
-        file_path = os.path.join(module_dir, filename)
-        string_list = []
-        with open(file_path, 'r') as f:
-            for line in f:
-                if any(w in line for word in READ):
-                    string_list.append(line.rstrip('\n').replace(' ', '').lstrip(word))
-
-        return (file_id, file_pass)
-        
+	
     def WriteToDbCounters(self, dictionary):
         counters_list = list(Counter.objects.values_list('counter', flat=True))
         d = self.parse_json_dict(dictionary, counters_list)
@@ -57,7 +43,7 @@ class KdmToolSet:
         
     def WriteToDbSummary(self, report, counters_list):
         """ (dict, list ) -> NoneType 
-        Writes or updates
+        Writes or updates Summary table
         """
         i = 0   
         for item in report['query']['ids']:         
