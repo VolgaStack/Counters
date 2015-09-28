@@ -8,15 +8,6 @@ REPORT = 'stat/v1/data?ids=%s&oauth_token=%s'
 API = 'https://api-metrika.yandex.ru/'
 
 class MetricaMethodTests(TestCase):
-
-    def test_auth_right_client_id(self):
-        """ m.OAuth should set self.token to token if authorize was sucsessfull
-        """
-        client_id = 'c9aff383ddfc4f7693637c984bfc064a'
-        token = '7f56b1a9d80648c7b87ae588a905a9be' 
-        m = Metrica(client_id)
-        m.OAuth()
-        self.assertEqual(m._token, token)
         
     def test_get_counters_url_creation(self):
         """ m.OAuth should set self.token to token if authorize was sucsessfull
